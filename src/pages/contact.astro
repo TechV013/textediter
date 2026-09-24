@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getContactEmail } from '../lib/seo/site';
+
+const email = getContactEmail();
+const mailto = `mailto:${email}?subject=${encodeURIComponent('TextFixer inquiry')}`;
+---
+
+<BaseLayout
+  title="Contact"
+  description="Contact TextFixer. Simple mailto contact — no account required."
+  canonicalPath="/contact"
+>
+  <article class="container-page max-w-3xl py-12">
+    <h1 class="text-3xl font-bold tracking-tight">Contact</h1>
+    <p class="mt-4 text-muted">
+      For product feedback, privacy questions, or partnership inquiries, email us. There is no
+      database-backed contact form in V1.
+    </p>
+    <p class="mt-6">
+      <a class="btn-primary" href={mailto}>{email}</a>
+    </p>
+    <p class="mt-4 text-sm text-muted">
+      The address is configured via <code class="rounded bg-surface-2 px-1">PUBLIC_CONTACT_EMAIL</code>.
+    </p>
+  </article>
+</BaseLayout>

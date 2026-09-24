@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolSearch from '../components/ToolSearch.astro';
+import ToolCard from '../components/ToolCard.astro';
+import { getPopularTools } from '../lib/tools/registry';
+
+const popular = getPopularTools();
+---
+
+<BaseLayout
+  title="Page not found"
+  description="The page you requested could not be found on TextFixer."
+  canonicalPath="/404"
+  noindex={true}
+>
+  <div class="container-page py-16 text-center">
+    <p class="text-sm font-semibold uppercase tracking-wide text-accent">Error 404</p>
+    <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Page not found</h1>
+    <p class="mx-auto mt-3 max-w-md text-muted">
+      That URL doesn't exist. Try searching for a tool below or visit a popular tool.
+    </p>
+
+    <div class="mt-8 max-w-lg mx-auto">
+      <ToolSearch autofocus />
+    </div>
+
+    <div class="mt-10">
+      <h2 class="text-xl font-semibold tracking-tight">Popular tools</h2>
+      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {popular.slice(0, 6).map((tool) => <ToolCard tool={tool} />)}
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <a class="btn-primary" href="/">← Go to homepage</a>
+    </div>
+  </div>
+</BaseLayout>

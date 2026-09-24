@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", ui-monospace, monospace;
+
+  --color-canvas: var(--tf-canvas);
+  --color-surface: var(--tf-surface);
+  --color-surface-2: var(--tf-surface-2);
+  --color-ink: var(--tf-ink);
+  --color-muted: var(--tf-muted);
+  --color-border: var(--tf-border);
+  --color-accent: var(--tf-accent);
+  --color-accent-fg: var(--tf-accent-fg);
+  --color-accent-soft: var(--tf-accent-soft);
+  --color-violet-accent: var(--tf-violet-accent);
+  --color-danger: var(--tf-danger);
+  --color-success: var(--tf-success);
+  --color-focus: var(--tf-focus);
+}
+
+:root {
+  /* Light mode - clean contrast */
+  --tf-canvas: #f4f5f6;
+  --tf-surface: #ffffff;
+  --tf-surface-2: #eaebed;
+  --tf-ink: #0f141c;
+  --tf-muted: #5e6675;
+  --tf-border: #d2d5da;
+  --tf-accent: #0891b2;
+  --tf-accent-fg: #ffffff;
+  --tf-accent-soft: #ecfeff;
+  --tf-violet-accent: #6d28d9;
+  --tf-danger: #cf222e;
+  --tf-success: #1a7f37;
+  --tf-focus: #0891b2;
+  color-scheme: light;
+}
+
+.dark {
+  /* Dark Cyber HUD theme */
+  --tf-canvas: #0b0d10;
+  --tf-surface: #11151a;
+  --tf-surface-2: #171c22;
+  --tf-ink: #f3f5f7;
+  --tf-muted: #9aa4af;
+  --tf-border: #252c35;
+  --tf-accent: #22d3ee;
+  --tf-accent-fg: #083344;
+  --tf-accent-soft: rgba(34, 211, 238, 0.08);
+  --tf-violet-accent: #8b5cf6;
+  --tf-danger: #ef4444;
+  --tf-success: #22c55e;
+  --tf-focus: #22d3ee;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    /* Cyber technical grid background */
+    background-image:
+      linear-gradient(to right, rgba(34, 211, 238, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(34, 211, 238, 0.02) 1px, transparent 1px),
+      radial-gradient(ellipse 70% 60% at 50% -10%, rgba(34, 211, 238, 0.07), transparent 70%);
+    background-size: 40px 40px, 40px 40px, 100% 100%;
+    background-attachment: fixed;
+    min-height: 100dvh;
+  }
+
+  /* In light mode, override grid opacity to be subtle gray-accent */
+  html:not(.dark) body {
+    background-image:
+      linear-gradient(to right, rgba(8, 145, 178, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(8, 145, 178, 0.03) 1px, transparent 1px),
+      radial-gradient(ellipse 70% 60% at 50% -10%, rgba(8, 145, 178, 0.04), transparent 70%);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--tf-focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--tf-accent) 25%, transparent);
+    color: var(--tf-ink);
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded border border-accent/25 px-4 py-2 text-sm font-semibold tracking-wide transition-all duration-200
+      bg-accent text-accent-fg hover:brightness-110 active:scale-[0.98]
+      hover:shadow-[0_0_12px_rgba(34,211,238,0.25)] dark:hover:shadow-[0_0_16px_rgba(34,211,238,0.35)]
+      disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded border border-border px-4 py-2 text-sm font-semibold tracking-wide transition-all duration-200
+      bg-surface text-ink hover:bg-surface-2 hover:border-accent/40 active:scale-[0.98]
+      disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-ghost {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded border border-transparent px-4 py-2 text-sm font-semibold tracking-wide transition-all duration-200
+      text-muted hover:bg-surface-2 hover:text-ink
+      disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted font-mono;
+  }
+
+  .text-editor {
+    @apply min-h-48 w-full resize-y rounded border border-border bg-surface p-3.5 font-mono text-sm leading-relaxed text-ink
+      placeholder:text-muted/60 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30;
+  }
+
+  /* HUD Panel Design */
+  .panel {
+    @apply rounded border border-border bg-surface/90 p-4 shadow-sm backdrop-blur-sm sm:p-5 relative transition-all duration-300;
+  }
+
+  /* Cyber diagonal cut accent corner (pure CSS decoration) */
+  .panel::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 6px;
+    height: 6px;
+    background: var(--tf-accent);
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+    opacity: 0.7;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded border border-border bg-surface-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted font-mono;
+  }
+
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-fg;
+  }
+
+  /* Monospace keyboard shortcuts kbd styling */
+  kbd {
+    @apply rounded border border-border bg-surface-2 px-1 py-0.5 text-[10px] font-bold uppercase tracking-wider font-mono text-muted;
+  }
+}

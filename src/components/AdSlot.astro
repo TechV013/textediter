@@ -1,0 +1,36 @@
+---
+/**
+ * Reserved responsive ad region for future AdSense.
+ * Does not load third-party scripts in V1.
+ * Never place near primary tool controls in a deceptive way.
+ */
+interface Props {
+  slotId: string;
+  label?: string;
+  class?: string;
+}
+
+const { slotId, label = 'Advertisement', class: className = '' } = Astro.props;
+const adsEnabled = import.meta.env.PUBLIC_ADS_ENABLED === 'true';
+---
+
+{
+  adsEnabled ? (
+    <aside
+      class:list={['ad-slot rounded-xl border border-border bg-surface-2/50 p-4', className]}
+      data-ad-slot={slotId}
+      aria-label={label}
+    >
+      <p class="mb-2 text-center text-[11px] uppercase tracking-wider text-muted">{label}</p>
+      <div class="mx-auto min-h-[90px] w-full max-w-[728px]" data-ad-container></div>
+    </aside>
+  ) : (
+    <aside
+      class:list={['ad-slot-placeholder hidden', className]}
+      data-ad-slot={slotId}
+      data-ad-ready="false"
+      hidden
+      aria-hidden="true"
+    ></aside>
+  )
+}

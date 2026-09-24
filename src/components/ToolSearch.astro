@@ -1,0 +1,169 @@
+---
+import { getAllTools } from '../lib/tools/registry';
+import { buildSearchDocuments } from '../lib/tools/search';
+
+interface Props {
+  autofocus?: boolean;
+  class?: string;
+}
+
+const { autofocus = false, class: className = '' } = Astro.props;
+const documents = buildSearchDocuments(getAllTools());
+const payload = JSON.stringify(documents);
+---
+
+<div class:list={['tool-search', className]} data-tool-search>
+  <label class="field-label" for="tool-search-input">Search tools</label>
+  <div class="relative">
+    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+      <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+    </div>
+    <input
+      id="tool-search-input"
+      class="w-full rounded-lg border border-border bg-surface pl-12 pr-20 py-3.5 text-base shadow-sm placeholder:text-muted/60 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all"
+      type="search"
+      name="q"
+      placeholder="Search all text tools..."
+      autocomplete="off"
+      spellcheck={false}
+      role="combobox"
+      aria-expanded="false"
+      aria-controls="tool-search-results"
+      aria-autocomplete="list"
+      autofocus={autofocus}
+      data-role="search-input"
+    />
+    <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+      <kbd class="text-[10px]">⌘K</kbd>
+    </div>
+    <ul
+      id="tool-search-results"
+      class="absolute z-20 mt-2 max-h-80 w-full overflow-auto rounded-lg border border-border bg-surface p-1 shadow-2xl shadow-black/20"
+      role="listbox"
+      data-role="search-results"
+      hidden
+    ></ul>
+  </div>
+  <script type="application/json" is:inline data-role="search-data" set:html={payload} />
+</div>
+
+<script>
+  import { searchTools, type ToolSearchDocument } from '../lib/tools/search';
+  import { track } from '../lib/analytics/track';
+
+  const categoryLabels: Record<string, string> = {
+    cleaning: 'Cleaning',
+    transformation: 'Transformation',
+    analysis: 'Analysis',
+    extraction: 'Extraction',
+    comparison: 'Comparison',
+    'web-developer': 'Web & Developer',
+    special: 'Special',
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-tool-search]').forEach((root) => {
+    const input = root.querySelector<HTMLInputElement>('[data-role="search-input"]');
+    const list = root.querySelector<HTMLUListElement>('[data-role="search-results"]');
+    const dataEl = root.querySelector<HTMLScriptElement>('[data-role="search-data"]');
+    if (!input || !list || !dataEl?.textContent) return;
+
+    let documents: ToolSearchDocument[] = [];
+    try {
+      documents = JSON.parse(dataEl.textContent) as ToolSearchDocument[];
+    } catch {
+      return;
+    }
+
+    let activeIndex = -1;
+
+    function close() {
+      list!.hidden = true;
+      input!.setAttribute('aria-expanded', 'false');
+      activeIndex = -1;
+    }
+
+    function render(results: ToolSearchDocument[]) {
+      list!.replaceChildren();
+      if (results.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'px-3 py-2 text-sm text-muted';
+        empty.textContent = 'No tools matched. Try another phrase.';
+        list!.appendChild(empty);
+        list!.hidden = false;
+        input!.setAttribute('aria-expanded', 'true');
+        return;
+      }
+
+      results.slice(0, 8).forEach((doc, index) => {
+        const li = document.createElement('li');
+        li.setAttribute('role', 'option');
+        li.id = `tool-search-option-${index}`;
+        li.className =
+          'cursor-pointer rounded-lg px-3 py-2 hover:bg-accent-soft aria-[selected=true]:bg-accent-soft';
+        li.dataset.href = `/${doc.slug}`;
+        li.innerHTML = `<span class="block font-medium"></span><span class="block text-xs text-muted"></span>`;
+        const title = li.querySelector('span:first-child');
+        const subtitle = li.querySelector('span:last-child');
+        if (title) title.textContent = doc.name;
+        if (subtitle) {
+          subtitle.textContent = `${categoryLabels[doc.category] ?? doc.category} · ${doc.shortDescription}`;
+        }
+        li.addEventListener('mousedown', (event) => {
+          event.preventDefault();
+          track({ event: 'tool_search', meta: { selected: doc.slug } });
+          window.location.href = `/${doc.slug}`;
+        });
+        list!.appendChild(li);
+      });
+
+      list!.hidden = false;
+      input!.setAttribute('aria-expanded', 'true');
+    }
+
+    function update() {
+      const q = input!.value;
+      if (!q.trim()) {
+        close();
+        return;
+      }
+      const results = searchTools(documents, q);
+      track({ event: 'tool_search', meta: { q_length: q.trim().length, results: results.length } });
+      render(results);
+    }
+
+    input.addEventListener('input', update);
+    input.addEventListener('focus', () => {
+      if (input.value.trim()) update();
+    });
+    input.addEventListener('keydown', (event) => {
+      const options = [...list.querySelectorAll<HTMLElement>('[role="option"]')];
+      if (event.key === 'Escape') {
+        close();
+        return;
+      }
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, options.length - 1);
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, 0);
+      } else if (event.key === 'Enter' && activeIndex >= 0 && options[activeIndex]) {
+        event.preventDefault();
+        const href = options[activeIndex].dataset.href;
+        if (href) window.location.href = href;
+        return;
+      } else {
+        return;
+      }
+      options.forEach((el, i) => el.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false'));
+      if (options[activeIndex]) input.setAttribute('aria-activedescendant', options[activeIndex].id);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!root.contains(event.target as Node)) close();
+    });
+  });
+</script>

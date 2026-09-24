@@ -1,0 +1,242 @@
+---
+import type { ToolDefinition } from '../../lib/tools/types';
+import ToolOptions from './ToolOptions.astro';
+
+interface Props {
+  tool: ToolDefinition;
+}
+
+const { tool } = Astro.props;
+const actionLabel = tool.actionLabel ?? 'Process';
+const supportsDownload = tool.supportsDownload !== false;
+const isDual = tool.dualInput === true;
+---
+
+<div
+  class="tool-shell"
+  data-tool-shell
+  data-tool-slug={tool.slug}
+  data-supports-download={supportsDownload ? 'true' : 'false'}
+  data-dual-input={isDual ? 'true' : 'false'}
+>
+  {isDual ? (
+    <>
+      <div class="grid gap-4 lg:grid-cols-2">
+        <section class="panel" aria-labelledby="input-a-heading">
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <h2 id="input-a-heading" class="field-label">Input A</h2>
+          </div>
+          <label class="sr-only" for={`input-a-${tool.slug}`}>First input text</label>
+          <textarea
+            id={`input-a-${tool.slug}`}
+            class="text-editor"
+            data-role="input-a"
+            rows="12"
+            placeholder="// Paste first text here…"
+            spellcheck="true"
+          ></textarea>
+        </section>
+
+        <section class="panel" aria-labelledby="input-b-heading">
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <h2 id="input-b-heading" class="field-label">Input B</h2>
+            <button type="button" class="btn-ghost text-xs h-8" data-action="clear" data-analytics-event="clear">
+              Clear
+            </button>
+          </div>
+          <label class="sr-only" for={`input-b-${tool.slug}`}>Second input text</label>
+          <textarea
+            id={`input-b-${tool.slug}`}
+            class="text-editor"
+            data-role="input-b"
+            rows="12"
+            placeholder="// Paste second text here…"
+            spellcheck="true"
+          ></textarea>
+        </section>
+      </div>
+
+      <section class="panel mt-4 flex flex-col" aria-labelledby="output-heading">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="output-heading" class="field-label">Output</h2>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="btn-secondary text-xs h-8" data-action="copy" disabled>
+              Copy
+            </button>
+            {
+              supportsDownload && (
+                <button type="button" class="btn-secondary text-xs h-8" data-action="download" disabled>
+                  Download
+                </button>
+              )
+            }
+          </div>
+        </div>
+        <label class="sr-only" for={`output-${tool.slug}`}>Output text</label>
+        <textarea
+          id={`output-${tool.slug}`}
+          class="text-editor flex-1"
+          data-role="output"
+          rows="14"
+          readonly
+          placeholder="// Result appears here…"
+        ></textarea>
+      </section>
+    </>
+  ) : (
+    <div class="grid gap-4 lg:grid-cols-2">
+      <section class="panel" aria-labelledby="input-heading">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <h2 id="input-heading" class="field-label">Input</h2>
+          <button type="button" class="btn-ghost text-xs h-8" data-action="clear" data-analytics-event="clear">
+            Clear
+          </button>
+        </div>
+        <label class="sr-only" for={`input-${tool.slug}`}>Input text</label>
+        <textarea
+          id={`input-${tool.slug}`}
+          class="text-editor"
+          data-role="input"
+          rows="14"
+          placeholder="// Paste your text here…"
+          spellcheck="true"
+        ></textarea>
+      </section>
+
+      <section class="panel flex flex-col" aria-labelledby="output-heading">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="output-heading" class="field-label">Output</h2>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="btn-secondary text-xs h-8" data-action="copy" disabled>
+              Copy
+            </button>
+            {
+              supportsDownload && (
+                <button type="button" class="btn-secondary text-xs h-8" data-action="download" disabled>
+                  Download
+                </button>
+              )
+            }
+          </div>
+        </div>
+        <label class="sr-only" for={`output-${tool.slug}`}>Output text</label>
+        <textarea
+          id={`output-${tool.slug}`}
+          class="text-editor flex-1"
+          data-role="output"
+          rows="14"
+          readonly
+          placeholder="// Result appears here…"
+        ></textarea>
+      </section>
+    </div>
+  )}
+
+  <form class="panel mt-4" data-role="options-form" onsubmit="return false;">
+    <h2 class="field-label mb-3">Options</h2>
+    <ToolOptions options={tool.options} />
+    <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <button type="button" class="btn-primary w-full sm:w-auto text-sm font-bold tracking-wide" data-action="process">
+        ⚡ {actionLabel}
+      </button>
+      <p class="text-xs text-muted font-mono">
+        <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>Enter</kbd> to run
+      </p>
+    </div>
+  </form>
+
+  <div
+    class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5"
+    data-role="stats"
+    aria-live="polite"
+    hidden
+  ></div>
+
+  <p class="sr-only" data-role="status" aria-live="polite"></p>
+  <p class="mt-3 text-sm text-danger" data-role="error" hidden></p>
+</div>
+
+<script>
+  import { initToolWorkbench } from '../../scripts/tool-workbench';
+  import type { ToolProcessResult } from '../../lib/tools/types';
+  import { textCleanerTool } from '../../lib/tools/text-cleaner.definition';
+  import { caseConverterTool } from '../../lib/tools/case-converter.definition';
+  import { findReplaceTool } from '../../lib/tools/find-replace.definition';
+  import { sortTextTool } from '../../lib/tools/sort-text.definition';
+  import { addPrefixSuffixTool } from '../../lib/tools/add-prefix-suffix.definition';
+  import { addLineNumbersTool } from '../../lib/tools/add-line-numbers.definition';
+  import { textToOneLineTool } from '../../lib/tools/text-to-one-line.definition';
+  import { wordCounterTool } from '../../lib/tools/word-counter.definition';
+  import { characterCounterTool } from '../../lib/tools/character-counter.definition';
+  import { textStatisticsTool } from '../../lib/tools/text-statistics.definition';
+  import { readingTimeTool } from '../../lib/tools/reading-time.definition';
+  import { readabilityCheckerTool } from '../../lib/tools/readability-checker.definition';
+  import { keywordCounterTool } from '../../lib/tools/keyword-counter.definition';
+  import { keywordDensityTool } from '../../lib/tools/keyword-density.definition';
+  import { emailExtractorTool } from '../../lib/tools/email-extractor.definition';
+  import { urlExtractorTool } from '../../lib/tools/url-extractor.definition';
+  import { phoneNumberExtractorTool } from '../../lib/tools/phone-number-extractor.definition';
+  import { textDiffTool } from '../../lib/tools/text-diff.definition';
+  import { compareTwoListsTool } from '../../lib/tools/compare-two-lists.definition';
+  import { removeExtraSpacesTool } from '../../lib/tools/remove-extra-spaces.definition';
+  import { removeLineBreaksTool } from '../../lib/tools/remove-line-breaks.definition';
+  import { jsonFormatterTool } from '../../lib/tools/json-formatter.definition';
+  import { jsonValidatorTool } from '../../lib/tools/json-validator.definition';
+  import { htmlToTextTool } from '../../lib/tools/html-to-text.definition';
+  import { invisibleCharacterDetectorTool } from '../../lib/tools/invisible-character-detector.definition';
+
+  const processors: Record<string, (input: string, options: Record<string, unknown>) => ToolProcessResult> = {
+    'text-cleaner': textCleanerTool.process!,
+    'case-converter': caseConverterTool.process!,
+    'find-and-replace': findReplaceTool.process!,
+    'sort-text': sortTextTool.process!,
+    'add-prefix-suffix': addPrefixSuffixTool.process!,
+    'add-line-numbers': addLineNumbersTool.process!,
+    'text-to-one-line': textToOneLineTool.process!,
+    'word-counter': wordCounterTool.process!,
+    'character-counter': characterCounterTool.process!,
+    'text-statistics': textStatisticsTool.process!,
+    'reading-time': readingTimeTool.process!,
+    'readability-checker': readabilityCheckerTool.process!,
+    'keyword-counter': keywordCounterTool.process!,
+    'keyword-density': keywordDensityTool.process!,
+    'email-extractor': emailExtractorTool.process!,
+    'url-extractor': urlExtractorTool.process!,
+    'phone-number-extractor': phoneNumberExtractorTool.process!,
+    'remove-extra-spaces': removeExtraSpacesTool.process!,
+    'remove-line-breaks': removeLineBreaksTool.process!,
+    'json-formatter': jsonFormatterTool.process!,
+    'json-validator': jsonValidatorTool.process!,
+    'html-to-text': htmlToTextTool.process!,
+    'invisible-character-detector': invisibleCharacterDetectorTool.process!,
+  };
+
+  const dualProcessors: Record<string, (a: string, b: string, options: Record<string, unknown>) => ToolProcessResult> = {
+    'text-diff': textDiffTool.processDual!,
+    'compare-two-lists': compareTwoListsTool.processDual!,
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-tool-shell]').forEach((root) => {
+    const slug = root.dataset.toolSlug;
+    const isDual = root.dataset.dualInput === 'true';
+    if (!slug) return;
+
+    if (isDual && dualProcessors[slug]) {
+      initToolWorkbench({
+        root,
+        slug,
+        processDual: dualProcessors[slug],
+        dual: true,
+      });
+    } else {
+      const process = processors[slug];
+      if (!process) return;
+      initToolWorkbench({
+        root,
+        slug,
+        process,
+        dual: false,
+      });
+    }
+  });
+</script>

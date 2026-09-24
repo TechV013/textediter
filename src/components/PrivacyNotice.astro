@@ -1,0 +1,17 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<aside
+  class:list={['rounded-xl border border-dashed border-border bg-accent-soft/40 px-4 py-3 text-sm text-muted', className]}
+  role="note"
+>
+  <p>
+    <strong class="font-semibold text-ink">Private by design:</strong>
+    this tool processes text in your browser. Your content is not uploaded to TextFixer for normal cleaning.
+  </p>
+</aside>

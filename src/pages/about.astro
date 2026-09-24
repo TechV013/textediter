@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import FAQSection from '../components/FAQSection.astro';
+import { organizationSchema, breadcrumbSchema } from '../lib/seo/schema';
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'About', path: '/about' },
+];
+
+const faqs = [
+  {
+    question: 'Who built TextFixer?',
+    answer: "TextFixer was built by a developer who wanted fast, private text tools that don't require signing up or uploading content to a server.",
+  },
+  {
+    question: 'Is TextFixer free?',
+    answer: 'Yes. All tools are free to use in your browser with no account required.',
+  },
+  {
+    question: 'How do you make money?',
+    answer: 'TextFixer may display advertisements in the future. The core tools will remain free.',
+  },
+  {
+    question: 'Can I suggest a new tool?',
+    answer: 'Yes. Use the contact page to suggest features or report problems. Suggestions are reviewed but not guaranteed to be implemented.',
+  },
+];
+---
+
+<BaseLayout
+  title="About TextFixer"
+  description="Learn what TextFixer is: fast, private, no-login browser text utilities for cleaning, transforming, analyzing, extracting, and comparing text."
+  canonicalPath="/about"
+  jsonLd={[organizationSchema(), breadcrumbSchema(crumbs)]}
+>
+  <article class="container-page max-w-3xl py-12">
+    <Breadcrumbs items={crumbs} />
+
+    <h1 class="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">About TextFixer</h1>
+    <p class="mt-4 text-lg text-muted">
+      TextFixer is a collection of fast, private browser text utilities for working with text.
+    </p>
+
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold">What problem does TextFixer solve?</h2>
+      <p class="mt-3 text-muted">
+        Anyone who works with text regularly runs into formatting problems. Writers clean up pasted content. Developers format JSON and strip HTML. Students check word counts and readability. Marketers analyze keyword density. Data analysts extract emails and phone numbers from documents.
+      </p>
+      <p class="mt-3 text-muted">
+        Most existing text tools require you to paste your content into a third-party server. That creates privacy concerns, especially for sensitive documents, business data, personal information, or confidential content. Some tools require accounts, impose limits, or charge for basic features.
+      </p>
+      <p class="mt-3 text-muted">
+        TextFixer takes a different approach: every tool runs in your browser. Your text never leaves your device for normal tools. No account required. No upload. No waiting.
+      </p>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold">What TextFixer does</h2>
+      <p class="mt-3 text-muted">
+        TextFixer provides tools across six categories:
+      </p>
+      <ul class="mt-3 list-disc space-y-1 pl-5 text-muted">
+        <li><strong class="text-ink">Cleaning</strong> — Remove extra spaces, blank lines, duplicates, and messy formatting</li>
+        <li><strong class="text-ink">Transformation</strong> — Convert case, sort lines, find and replace, add line numbers</li>
+        <li><strong class="text-ink">Analysis</strong> — Count words, characters, and sentences; check readability and keyword density</li>
+        <li><strong class="text-ink">Extraction</strong> — Pull emails, URLs, and phone numbers from text</li>
+        <li><strong class="text-ink">Comparison</strong> — Diff two texts or find unique items in two lists</li>
+        <li><strong class="text-ink">Web and Developer</strong> — Format JSON, strip HTML, and validate data</li>
+      </ul>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold">Browser-first philosophy</h2>
+      <p class="mt-3 text-muted">
+        TextFixer is built on a simple principle: your text should stay on your device. When you paste text into a TextFixer tool, the processing happens entirely in your browser using JavaScript. No content is uploaded to a server for normal tools.
+      </p>
+      <p class="mt-3 text-muted">
+        This means the tools work offline once loaded, your data never leaves your machine, and there is no server dependency for the core experience. The tradeoff is that complex server-side features like real-time collaboration or AI-powered analysis are not part of TextFixer's current scope.
+      </p>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold">Accuracy and limitations</h2>
+      <p class="mt-3 text-muted">
+        TextFixer tools are utilities, not professional advisors. Readability scores are estimates based on standard formulas. Phone number and email extraction identify patterns, they do not verify whether something is real. Keyword density calculations are mathematical, but "good" density depends on context that the tool cannot judge.
+      </p>
+      <p class="mt-3 text-muted">
+        Always review tool outputs before relying on them for important decisions. If you find a bug or inaccurate result, please use the <a class="text-accent underline" href="/contact">contact page</a> to report it.
+      </p>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold">How improvements are made</h2>
+      <p class="mt-3 text-muted">
+        Tools are improved based on practical use cases and user feedback. New features are added when they serve a genuine need, not to inflate tool counts. Each tool follows the same architecture: a definition file, a processing module, a page, and unit tests.
+      </p>
+    </section>
+
+    <FAQSection faqs={faqs} class="mt-12" />
+  </article>
+</BaseLayout>

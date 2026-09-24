@@ -1,0 +1,168 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolSearch from '../components/ToolSearch.astro';
+import ToolCard from '../components/ToolCard.astro';
+import FAQSection from '../components/FAQSection.astro';
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TAGLINE,
+} from '../lib/seo/site';
+import {
+  organizationSchema,
+  webSiteSchema,
+  faqPageSchema,
+} from '../lib/seo/schema';
+import {
+  getAllTools,
+  getPopularTools,
+  TOOL_CATEGORY_LABELS,
+  getToolsByCategory,
+} from '../lib/tools/registry';
+import type { ToolCategory } from '../lib/tools/types';
+
+const popular = getPopularTools();
+const allTools = getAllTools();
+const categories = Object.keys(TOOL_CATEGORY_LABELS) as ToolCategory[];
+const activeCategories = categories.filter(c => getToolsByCategory(c).length > 0);
+
+const faqs = [
+  {
+    question: 'Is TextFixer free?',
+    answer:
+      'Yes. The tools are free to use in your browser. No account is required.',
+  },
+  {
+    question: 'Do you upload my text?',
+    answer:
+      'Normal TextFixer tools process text locally in your browser. Your content is not sent to a TextFixer server for those tools.',
+  },
+  {
+    question: 'Do I need to sign up?',
+    answer: 'No. Paste, process, and copy — without creating an account.',
+  },
+];
+---
+
+<BaseLayout title={`${SITE_NAME} — ${SITE_TAGLINE}`} description={SITE_DESCRIPTION} canonicalPath="/" jsonLd={[organizationSchema(), webSiteSchema(), faqPageSchema(faqs)]}>
+  <section class="container-page py-16 sm:py-20">
+    <div class="max-w-3xl">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl font-extrabold text-accent font-mono">&gt;_</span>
+        <p class="text-xs font-bold uppercase tracking-widest text-muted font-mono">{SITE_NAME}</p>
+      </div>
+      <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+        Clean. Transform. Analyze.<br/>Extract. Compare. <span class="text-accent">Done.</span>
+      </h1>
+      <p class="mt-5 text-lg text-muted leading-relaxed">
+        Fast, private text utilities that run in your browser. Paste → process → copy. No login required.
+      </p>
+
+      <!-- Status indicators - HUD style -->
+      <div class="mt-6 flex flex-wrap items-center gap-4 text-xs font-mono">
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
+          <span class="text-muted uppercase tracking-wider">Local Processing</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+          <span class="text-muted uppercase tracking-wider">No Login</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
+          <span class="text-muted uppercase tracking-wider">Instant</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 max-w-2xl">
+      <ToolSearch autofocus />
+    </div>
+  </section>
+
+  <section class="container-page pb-12" aria-labelledby="popular-heading">
+    <div class="flex items-end justify-between gap-4">
+      <h2 id="popular-heading" class="text-2xl font-semibold tracking-tight">Popular tools</h2>
+      <a href="#tools" class="text-sm font-medium text-accent hover:underline">View all</a>
+    </div>
+    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {popular.map((tool) => <ToolCard tool={tool} />)}
+      {
+        popular.length === 0 && (
+          <p class="text-muted">Tools are being added. Start with Text Cleaner below.</p>
+        )
+      }
+    </div>
+  </section>
+
+  <section id="tools" class="container-page scroll-mt-20 pb-16" aria-labelledby="all-tools-heading">
+    <h2 id="all-tools-heading" class="text-2xl font-semibold tracking-tight">All tools</h2>
+    <p class="mt-2 max-w-2xl text-muted">
+      {allTools.length} tool{allTools.length === 1 ? '' : 's'} across {activeCategories.length} categories.
+    </p>
+
+    <div class="mt-8 space-y-10">
+      {
+        categories.map((category) => {
+          const tools = getToolsByCategory(category);
+          if (tools.length === 0) return null;
+          return (
+            <div id={category}>
+              <h3 class="text-lg font-semibold">{TOOL_CATEGORY_LABELS[category]}</h3>
+              <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {tools.map((tool) => (
+                  <ToolCard tool={tool} />
+                ))}
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <section class="border-y border-border bg-surface/50">
+    <div class="container-page grid gap-8 py-12 sm:grid-cols-3">
+      <div>
+        <h2 class="text-lg font-semibold">Private</h2>
+        <p class="mt-2 text-sm text-muted">
+          Normal tools run locally in your browser. We don’t ask you to create an account.
+        </p>
+      </div>
+      <div>
+        <h2 class="text-lg font-semibold">Fast</h2>
+        <p class="mt-2 text-sm text-muted">
+          Lightweight pages, minimal JavaScript, and instant processing for everyday text chores.
+        </p>
+      </div>
+      <div>
+        <h2 class="text-lg font-semibold">Simple</h2>
+        <p class="mt-2 text-sm text-muted">
+          Paste your text, choose options, copy the result. Built for phones and desktops.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-page py-12" aria-labelledby="how-heading">
+    <h2 id="how-heading" class="text-2xl font-semibold tracking-tight">How TextFixer works</h2>
+    <ol class="mt-5 grid gap-4 sm:grid-cols-3">
+      <li class="panel">
+        <p class="text-sm font-semibold text-accent">1. Paste</p>
+        <p class="mt-2 text-sm text-muted">Drop in messy notes, lists, JSON, copied web text, or two versions to compare.</p>
+      </li>
+      <li class="panel">
+        <p class="text-sm font-semibold text-accent">2. Process</p>
+        <p class="mt-2 text-sm text-muted">Clean, transform, analyze, extract, or compare — all in your browser with clear options.</p>
+      </li>
+      <li class="panel">
+        <p class="text-sm font-semibold text-accent">3. Copy</p>
+        <p class="mt-2 text-sm text-muted">Copy or download the result. Nothing to install.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div class="container-page pb-16">
+    <FAQSection faqs={faqs} />
+  </div>
+</BaseLayout>

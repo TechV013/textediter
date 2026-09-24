@@ -1,0 +1,79 @@
+---
+import type { ToolOptionControl } from '../../lib/tools/types';
+
+interface Props {
+  options: ToolOptionControl[];
+}
+
+const { options } = Astro.props;
+---
+
+{
+  options.length > 0 && (
+    <fieldset class="mt-4">
+      <legend class="sr-only">Tool options</legend>
+      <div class="grid gap-3 sm:grid-cols-2">
+        {options.map((option) => {
+          if (option.type === 'checkbox') {
+            return (
+              <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-canvas/50 p-3 hover:border-accent/50">
+                <input
+                  type="checkbox"
+                  class="mt-1 h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                  name={option.key}
+                  data-option={option.key}
+                  checked={option.defaultValue}
+                />
+                <span>
+                  <span class="block text-sm font-medium">{option.label}</span>
+                  {option.description && (
+                    <span class="mt-0.5 block text-xs text-muted">{option.description}</span>
+                  )}
+                </span>
+              </label>
+            );
+          }
+
+          if (option.type === 'select') {
+            return (
+              <label class="block rounded-lg border border-border bg-canvas/50 p-3">
+                <span class="field-label">{option.label}</span>
+                <select
+                  class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+                  name={option.key}
+                  data-option={option.key}
+                >
+                  {option.choices.map((choice) => (
+                    <option value={choice.value} selected={choice.value === option.defaultValue}>
+                      {choice.label}
+                    </option>
+                  ))}
+                </select>
+                {option.description && (
+                  <span class="mt-1 block text-xs text-muted">{option.description}</span>
+                )}
+              </label>
+            );
+          }
+
+          return (
+            <label class="block rounded-lg border border-border bg-canvas/50 p-3 sm:col-span-2">
+              <span class="field-label">{option.label}</span>
+              <input
+                type="text"
+                class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+                name={option.key}
+                data-option={option.key}
+                value={option.defaultValue}
+                placeholder={option.placeholder}
+              />
+              {option.description && (
+                <span class="mt-1 block text-xs text-muted">{option.description}</span>
+              )}
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  )
+}

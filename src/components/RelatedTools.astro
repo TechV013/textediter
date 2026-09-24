@@ -1,0 +1,38 @@
+---
+import type { ToolDefinition } from '../lib/tools/types';
+import { getCategoryLabel } from '../lib/tools/registry';
+
+interface Props {
+  tools: ToolDefinition[];
+  class?: string;
+  heading?: string;
+}
+
+const { tools, class: className = '', heading = 'Related tools' } = Astro.props;
+---
+
+{
+  tools.length > 0 && (
+    <section class:list={[className]} aria-labelledby="related-tools-heading">
+      <h2 id="related-tools-heading" class="text-2xl font-semibold tracking-tight">
+        {heading}
+      </h2>
+      <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+        {tools.map((tool) => (
+          <li>
+            <a
+              href={`/${tool.slug}`}
+              class="panel block transition hover:border-accent hover:shadow-md"
+              data-analytics-event="related_tool_click"
+              data-tool={tool.slug}
+            >
+              <span class="chip">{getCategoryLabel(tool.category)}</span>
+              <span class="mt-2 block font-semibold text-ink">{tool.name}</span>
+              <span class="mt-1 block text-sm text-muted">{tool.shortDescription}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

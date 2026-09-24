@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE_NAME } from '../lib/seo/site';
+---
+
+<BaseLayout
+  title="Privacy Policy"
+  description="How TextFixer handles privacy for browser-based text tools."
+  canonicalPath="/privacy"
+>
+  <article class="container-page max-w-3xl py-12 prose-privacy">
+    <h1 class="text-3xl font-bold tracking-tight">Privacy Policy</h1>
+    <p class="mt-2 text-sm text-muted">Last updated: August 27, 2026</p>
+
+    <h2 class="mt-10 text-xl font-semibold">Summary</h2>
+    <p class="mt-3 text-muted">
+      {SITE_NAME} is designed so that normal text tools process your content locally in your browser.
+      We do not require an account to use the tools.
+    </p>
+
+    <h2 class="mt-10 text-xl font-semibold">Local processing</h2>
+    <p class="mt-3 text-muted">
+      For tools that run entirely in the browser (including Text Cleaner), your input text is not
+      uploaded to a {SITE_NAME} server for processing. Processing happens on your device using
+      client-side code.
+    </p>
+
+    <h2 class="mt-10 text-xl font-semibold">What we may store on your device</h2>
+    <p class="mt-3 text-muted">
+      We may use <code class="rounded bg-surface-2 px-1">localStorage</code> for non-sensitive preferences
+      such as theme (light/dark). We do not store your tool input or output in localStorage by default.
+    </p>
+
+    <h2 class="mt-10 text-xl font-semibold">Analytics</h2>
+    <p class="mt-3 text-muted">
+      If analytics are enabled in the future, we intend to track anonymous product events such as which
+      tools are opened or run. We will not send the contents of your input, output, extracted emails,
+      phone numbers, URLs, JSON, or HTML to analytics.
+    </p>
+
+    <h2 class="mt-10 text-xl font-semibold">Advertising</h2>
+    <p class="mt-3 text-muted">
+      The site may display advertisements in the future. Ad partners may use cookies or similar
+      technologies according to their own policies. Ads will not be designed to look like tool controls.
+    </p>
+
+    <h2 class="mt-10 text-xl font-semibold">Contact</h2>
+    <p class="mt-3 text-muted">
+      Privacy questions: see our <a class="text-accent underline" href="/contact">contact page</a>.
+    </p>
+
+    <h2 class="mt-10 text-xl font-semibold">Changes</h2>
+    <p class="mt-3 text-muted">
+      If future features require server-side processing, we will isolate them and update this policy to
+      match the actual architecture.
+    </p>
+  </article>
+</BaseLayout>

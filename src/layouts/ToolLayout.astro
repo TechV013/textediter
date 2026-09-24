@@ -1,0 +1,118 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import FAQSection from '../components/FAQSection.astro';
+import RelatedTools from '../components/RelatedTools.astro';
+import PrivacyNotice from '../components/PrivacyNotice.astro';
+import AdSlot from '../components/AdSlot.astro';
+import ToolShell from '../components/tools/ToolShell.astro';
+import type { ToolDefinition } from '../lib/tools/types';
+import { getCategoryLabel, getRelatedTools } from '../lib/tools/registry';
+import {
+  breadcrumbSchema,
+  faqPageSchema,
+  webApplicationSchema,
+} from '../lib/seo/schema';
+
+interface Props {
+  tool: ToolDefinition;
+}
+
+const { tool } = Astro.props;
+const related = getRelatedTools(tool.relatedTools);
+const categoryLabel = getCategoryLabel(tool.category);
+const path = `/${tool.slug}`;
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: categoryLabel, path: `/#${tool.category}` },
+  { name: tool.name, path },
+];
+
+const jsonLd = [
+  webApplicationSchema({
+    name: tool.name,
+    description: tool.metaDescription,
+    path,
+  }),
+  breadcrumbSchema(crumbs),
+  ...(tool.faq.length > 0 ? [faqPageSchema(tool.faq)] : []),
+];
+---
+
+<BaseLayout
+  title={tool.seoTitle}
+  description={tool.metaDescription}
+  canonicalPath={path}
+  jsonLd={jsonLd}
+>
+  <div class="container-page py-8 sm:py-10">
+    <Breadcrumbs items={crumbs} />
+
+    <header class="mt-4 max-w-3xl">
+      <p class="text-sm font-medium uppercase tracking-wide text-accent">{categoryLabel}</p>
+      <h1 class="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">{tool.name}</h1>
+      <p class="mt-3 text-base text-muted sm:text-lg">{tool.description}</p>
+    </header>
+
+    <div class="mt-8">
+      <ToolShell tool={tool} />
+    </div>
+
+    <PrivacyNotice class="mt-6" />
+
+    <section class="prose-tool mt-12 max-w-3xl" aria-labelledby="how-to-heading">
+      <h2 id="how-to-heading" class="text-2xl font-semibold tracking-tight">How to use {tool.name}</h2>
+      <ol class="mt-4 list-decimal space-y-2 pl-5 text-muted">
+        {tool.howToSteps.map((step) => <li>{step}</li>)}
+      </ol>
+    </section>
+
+    {
+      tool.examples.length > 0 && (
+        <section class="mt-12 max-w-3xl" aria-labelledby="example-heading">
+          <h2 id="example-heading" class="text-2xl font-semibold tracking-tight">Example</h2>
+          {
+            tool.examples.map((example) => (
+              <div class="panel mt-4">
+                <h3 class="font-semibold">{example.title}</h3>
+                {example.optionsNote && (
+                  <p class="mt-1 text-sm text-muted">{example.optionsNote}</p>
+                )}
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <p class="field-label">Input</p>
+                    <pre class="overflow-x-auto rounded-lg bg-surface-2 p-3 font-mono text-xs whitespace-pre-wrap">{example.input}</pre>
+                  </div>
+                  <div>
+                    <p class="field-label">Output</p>
+                    <pre class="overflow-x-auto rounded-lg bg-surface-2 p-3 font-mono text-xs whitespace-pre-wrap">{example.output}</pre>
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </section>
+      )
+    }
+
+    {
+      tool.useCases.length > 0 && (
+        <section class="mt-12 max-w-3xl" aria-labelledby="usecases-heading">
+          <h2 id="usecases-heading" class="text-2xl font-semibold tracking-tight">Common use cases</h2>
+          <ul class="mt-4 list-disc space-y-2 pl-5 text-muted">
+            {tool.useCases.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <AdSlot slotId="tool-mid" class="mt-12" label="Advertisement" />
+
+    <RelatedTools tools={related} class="mt-12" />
+
+    {tool.faq.length > 0 && <FAQSection faqs={tool.faq} class="mt-12" />}
+  </div>
+</BaseLayout>
